@@ -452,6 +452,19 @@ tbody tr:hover {
   .graficos {
     grid-template-columns: 1fr;
   }
+
+  .contenedor-grafico {
+    height: 220px;
+  }
+
+  .panel-mapa #mapa {
+    height: 340px;
+  }
+
+  .contenedor {
+    padding-top: 1.15rem;
+    gap: 1.15rem;
+  }
 }
 
 @media (max-width: 640px) {
@@ -461,13 +474,103 @@ tbody tr:hover {
     padding-right: 1rem;
   }
 
+  /* Encabezado: logo y título en fila, acciones debajo a ancho completo */
   .encabezado {
-    justify-content: center;
-    text-align: center;
+    align-items: flex-start;
+    gap: 0.75rem;
   }
 
-  .titulo {
-    flex-direction: column;
-    gap: 0.5rem;
+  .titulo h1 {
+    font-size: 1.2rem;
+  }
+
+  .titulo p {
+    font-size: 0.74rem;
+  }
+
+  .acciones {
+    width: 100%;
+  }
+
+  .filtros {
+    flex: 1;
+  }
+
+  .filtros button {
+    flex: 1;
+    padding: 0.45rem 0.5rem;
+  }
+
+  .boton-tema {
+    flex-shrink: 0;
+  }
+
+  /* KPIs en dos columnas compactas */
+  .kpis {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    gap: 0.65rem;
+  }
+
+  .kpi {
+    padding: 0.85rem 0.9rem;
+    gap: 0.65rem;
+  }
+
+  .kpi-icono {
+    width: 38px;
+    height: 38px;
+    border-radius: 10px;
+  }
+
+  .kpi-icono svg {
+    width: 18px;
+    height: 18px;
+  }
+
+  .kpi-valor {
+    font-size: 1.12rem;
+  }
+
+  .kpi-etiqueta {
+    font-size: 0.66rem;
+    display: -webkit-box;
+    -webkit-line-clamp: 2;
+    line-clamp: 2;
+    -webkit-box-orient: vertical;
+    overflow: hidden;
+  }
+
+  /* Paneles más compactos */
+  .panel {
+    padding: 1rem 1.1rem;
+  }
+
+  .panel-mapa #mapa {
+    height: 300px;
+  }
+
+  .leyenda {
+    gap: 0.8rem;
+    justify-content: center;
+  }
+
+  /* Tabla compacta */
+  .tabla-scroll {
+    max-height: 320px;
+  }
+
+  table {
+    font-size: 0.78rem;
+  }
+
+  thead th,
+  tbody td {
+    padding: 0.5rem 0.55rem;
+  }
+}
+
+@media (max-width: 400px) {
+  .titulo p {
+    display: none;
   }
 }
