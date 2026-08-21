@@ -24,7 +24,7 @@ Dashboard web que muestra estadísticas de los sismos registrados en el territor
 
 ## 🚀 Ver en línea
 
-Desplegado en Render: *(link pendiente)*
+Desplegado en Render: [sismos-peru.onrender.com](https://sismos-peru.onrender.com)
 
 ## 👤 Autor
 
