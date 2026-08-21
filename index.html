@@ -4,48 +4,86 @@
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title>SismoPerú | Sistema Estadístico de Sismos del Perú</title>
-  <link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><text y='.9em' font-size='90'>🌋</text></svg>" />
+  <link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 32'><rect width='32' height='32' rx='7' fill='%230c1017'/><polyline points='4,17 9,17 12,9 16,24 20,12 23,19 28,15' fill='none' stroke='%23ef4444' stroke-width='2.5' stroke-linecap='round' stroke-linejoin='round'/></svg>" />
+  <script>
+    (function () {
+      var tema = localStorage.getItem("tema");
+      if (!tema) {
+        tema = window.matchMedia("(prefers-color-scheme: light)").matches ? "light" : "dark";
+      }
+      document.documentElement.dataset.theme = tema;
+    })();
+  </script>
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&family=Fira+Code:wght@400;500;600&display=swap" rel="stylesheet" />
   <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" />
   <link rel="stylesheet" href="css/styles.css" />
 </head>
 <body>
   <header class="encabezado">
     <div class="titulo">
-      <h1>🌋 SismoPerú</h1>
-      <p>Sistema estadístico de sismos registrados en el Perú · Datos en tiempo real del USGS</p>
+      <span class="logo" aria-hidden="true">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+          <polyline points="22 12 18 12 15 21 9 3 6 12 2 12" />
+        </svg>
+      </span>
+      <div>
+        <h1>SismoPerú</h1>
+        <p>Monitoreo tectónico del Perú · Datos en tiempo real del USGS</p>
+      </div>
     </div>
-    <nav class="filtros" id="filtros">
-      <button data-dias="7">Últimos 7 días</button>
-      <button data-dias="30" class="activo">Últimos 30 días</button>
-      <button data-dias="90">Últimos 90 días</button>
-    </nav>
+    <div class="acciones">
+      <nav class="filtros" id="filtros" aria-label="Rango de tiempo">
+        <button data-dias="7">7 días</button>
+        <button data-dias="30" class="activo">30 días</button>
+        <button data-dias="90">90 días</button>
+      </nav>
+      <button id="boton-tema" class="boton-tema" type="button" aria-label="Cambiar tema de color" title="Cambiar tema">
+        <svg class="icono-sol" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+          <circle cx="12" cy="12" r="4" />
+          <path d="M12 2v2" /><path d="M12 20v2" /><path d="m4.93 4.93 1.41 1.41" /><path d="m17.66 17.66 1.41 1.41" /><path d="M2 12h2" /><path d="M20 12h2" /><path d="m6.34 17.66-1.41 1.41" /><path d="m19.07 4.93-1.41 1.41" />
+        </svg>
+        <svg class="icono-luna" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+          <path d="M12 3a6 6 0 0 0 9 9 9 9 0 1 1-9-9Z" />
+        </svg>
+      </button>
+    </div>
   </header>
 
   <main class="contenedor">
     <section class="kpis">
       <article class="kpi">
-        <span class="kpi-icono">📈</span>
+        <span class="kpi-icono" aria-hidden="true">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="22 12 18 12 15 21 9 3 6 12 2 12" /></svg>
+        </span>
         <div>
           <span class="kpi-valor" id="kpi-total">—</span>
           <span class="kpi-etiqueta">Sismos registrados</span>
         </div>
       </article>
       <article class="kpi">
-        <span class="kpi-icono">📊</span>
+        <span class="kpi-icono" aria-hidden="true">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 3v18h18" /><path d="M18 17V9" /><path d="M13 17V5" /><path d="M8 17v-3" /></svg>
+        </span>
         <div>
           <span class="kpi-valor" id="kpi-promedio">—</span>
           <span class="kpi-etiqueta">Magnitud promedio</span>
         </div>
       </article>
       <article class="kpi">
-        <span class="kpi-icono">💥</span>
+        <span class="kpi-icono" aria-hidden="true">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M4 14a1 1 0 0 1-.78-1.63l9.9-10.2a.5.5 0 0 1 .86.46l-1.92 6.02A1 1 0 0 0 13 10h7a1 1 0 0 1 .78 1.63l-9.9 10.2a.5.5 0 0 1-.86-.46l1.92-6.02A1 1 0 0 0 11 14z" /></svg>
+        </span>
         <div>
           <span class="kpi-valor" id="kpi-maximo">—</span>
           <span class="kpi-etiqueta" id="kpi-maximo-lugar">Sismo más fuerte</span>
         </div>
       </article>
       <article class="kpi">
-        <span class="kpi-icono">📏</span>
+        <span class="kpi-icono" aria-hidden="true">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 17V3" /><path d="m6 11 6 6 6-6" /><path d="M19 21H5" /></svg>
+        </span>
         <div>
           <span class="kpi-valor" id="kpi-profundidad">—</span>
           <span class="kpi-etiqueta">Profundidad promedio</span>
