@@ -1,0 +1,115 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>SismoPerú | Sistema Estadístico de Sismos del Perú</title>
+  <link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><text y='.9em' font-size='90'>🌋</text></svg>" />
+  <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" />
+  <link rel="stylesheet" href="css/styles.css" />
+</head>
+<body>
+  <header class="encabezado">
+    <div class="titulo">
+      <h1>🌋 SismoPerú</h1>
+      <p>Sistema estadístico de sismos registrados en el Perú · Datos en tiempo real del USGS</p>
+    </div>
+    <nav class="filtros" id="filtros">
+      <button data-dias="7">Últimos 7 días</button>
+      <button data-dias="30" class="activo">Últimos 30 días</button>
+      <button data-dias="90">Últimos 90 días</button>
+    </nav>
+  </header>
+
+  <main class="contenedor">
+    <section class="kpis">
+      <article class="kpi">
+        <span class="kpi-icono">📈</span>
+        <div>
+          <span class="kpi-valor" id="kpi-total">—</span>
+          <span class="kpi-etiqueta">Sismos registrados</span>
+        </div>
+      </article>
+      <article class="kpi">
+        <span class="kpi-icono">📊</span>
+        <div>
+          <span class="kpi-valor" id="kpi-promedio">—</span>
+          <span class="kpi-etiqueta">Magnitud promedio</span>
+        </div>
+      </article>
+      <article class="kpi">
+        <span class="kpi-icono">💥</span>
+        <div>
+          <span class="kpi-valor" id="kpi-maximo">—</span>
+          <span class="kpi-etiqueta" id="kpi-maximo-lugar">Sismo más fuerte</span>
+        </div>
+      </article>
+      <article class="kpi">
+        <span class="kpi-icono">📏</span>
+        <div>
+          <span class="kpi-valor" id="kpi-profundidad">—</span>
+          <span class="kpi-etiqueta">Profundidad promedio</span>
+        </div>
+      </article>
+    </section>
+
+    <section class="graficos">
+      <article class="panel">
+        <h2>Sismos por día</h2>
+        <canvas id="grafico-linea"></canvas>
+      </article>
+      <article class="panel">
+        <h2>Distribución por magnitud</h2>
+        <canvas id="grafico-barras"></canvas>
+      </article>
+    </section>
+
+    <section class="panel panel-mapa">
+      <h2>Epicentros en el mapa</h2>
+      <div id="mapa"></div>
+      <div class="leyenda">
+        <span><i class="punto verde"></i>M &lt; 4.5</span>
+        <span><i class="punto amarillo"></i>4.5 – 5.4</span>
+        <span><i class="punto naranja"></i>5.5 – 5.9</span>
+        <span><i class="punto rojo"></i>≥ 6.0</span>
+      </div>
+    </section>
+
+    <section class="panel panel-tabla">
+      <h2>Detalle de sismos</h2>
+      <div class="tabla-scroll">
+        <table>
+          <thead>
+            <tr>
+              <th>Fecha y hora</th>
+              <th>Lugar</th>
+              <th>Magnitud</th>
+              <th>Profundidad</th>
+            </tr>
+          </thead>
+          <tbody id="tabla-cuerpo"></tbody>
+        </table>
+      </div>
+    </section>
+
+    <p id="mensaje-error" hidden></p>
+  </main>
+
+  <footer class="pie">
+    <p>
+      Fuente de datos:
+      <a href="https://earthquake.usgs.gov/" target="_blank" rel="noopener">USGS Earthquake Hazards Program</a>
+      · Proyecto académico — Curso Programación I (USMP)
+    </p>
+  </footer>
+
+  <div id="cargando" hidden>
+    <div class="spinner"></div>
+    <p>Cargando datos sísmicos…</p>
+  </div>
+
+  <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.1/dist/chart.umd.min.js"></script>
+  <script src="js/app.js"></script>
+</body>
+</html>
