@@ -2,6 +2,14 @@ const API_URL = "https://earthquake.usgs.gov/fdsnws/event/1/query";
 const MIN_MAGNITUD = 4;
 const PERU = { minLat: -18.5, maxLat: 0, minLon: -81.5, maxLon: -68.5 };
 
+const TILES = {
+  dark: "https://{s}.basemaps.cartocdn.com/dark_all/{z}/{x}/{y}{r}.png",
+  light: "https://{s}.basemaps.cartocdn.com/light_all/{z}/{x}/{y}{r}.png",
+};
+
+const ATRIBUCION_MAPA =
+  '&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> &copy; <a href="https://carto.com/attributions">CARTO</a>';
+
 const RANGOS_MAGNITUD = [
   { etiqueta: "4.0 – 4.4", min: 4.0, max: 4.5 },
   { etiqueta: "4.5 – 4.9", min: 4.5, max: 5.0 },
@@ -17,19 +25,65 @@ const formatoFecha = new Intl.DateTimeFormat("es-PE", {
 
 let graficoLinea = null;
 let graficoBarras = null;
+let mapa = null;
+let capaTiles = null;
 let capaMarcadores = null;
+let sismosActuales = [];
 
 document.addEventListener("DOMContentLoaded", () => {
+  registrarTema();
   inicializarMapa();
   registrarFiltros();
   cargarDatos(30);
 });
 
+function temaActual() {
+  return document.documentElement.dataset.theme === "light" ? "light" : "dark";
+}
+
+function registrarTema() {
+  document.getElementById("boton-tema").addEventListener("click", () => {
+    aplicarTema(temaActual() === "dark" ? "light" : "dark");
+  });
+}
+
+function aplicarTema(tema) {
+  document.documentElement.dataset.theme = tema;
+  localStorage.setItem("tema", tema);
+
+  if (mapa && capaTiles) {
+    mapa.removeLayer(capaTiles);
+    capaTiles = L.tileLayer(TILES[tema], {
+      attribution: ATRIBUCION_MAPA,
+      subdomains: "abcd",
+      maxZoom: 19,
+    }).addTo(mapa);
+    capaTiles.bringToBack();
+  }
+
+  if (sismosActuales.length > 0) {
+    renderizarGraficos(sismosActuales);
+  }
+}
+
+function leerVariableCss(nombre) {
+  return getComputedStyle(document.documentElement)
+    .getPropertyValue(nombre)
+    .trim();
+}
+
+function hexARgba(hex, alfa) {
+  const n = parseInt(hex.slice(1), 16);
+  const r = (n >> 16) & 255;
+  const g = (n >> 8) & 255;
+  const b = n & 255;
+  return `rgba(${r}, ${g}, ${b}, ${alfa})`;
+}
+
 function inicializarMapa() {
-  const mapa = L.map("mapa").setView([-9.2, -75.0], 5);
-  L.tileLayer("https://{s}.basemaps.cartocdn.com/dark_all/{z}/{x}/{y}{r}.png", {
-    attribution:
-      '&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> &copy; <a href="https://carto.com/attributions">CARTO</a>',
+  mapa = L.map("mapa").setView([-9.2, -75.0], 5);
+  capaTiles = L.tileLayer(TILES[temaActual()], {
+    attribution: ATRIBUCION_MAPA,
     subdomains: "abcd",
     maxZoom: 19,
   }).addTo(mapa);
@@ -109,7 +163,7 @@ function calcularEstadisticas(sismos) {
 function colorPorMagnitud(mag) {
   if (mag >= 6) return "#ef4444";
   if (mag >= 5.5) return "#f97316";
-  if (mag >= 4.5) return "#eab308";
+  if (mag >= 4.5) return "#f59e0b";
   return "#22c55e";
 }
 
@@ -165,21 +219,38 @@ function contarSismosPorMagnitud(sismos) {
 }
 
 function crearGraficoBase() {
+  const textoSuave = leerVariableCss("--texto-suave");
+  const rejilla = leerVariableCss("--grid-grafico");
+  const panel = leerVariableCss("--panel-flotante") || leerVariableCss("--panel");
+  const borde = leerVariableCss("--borde");
+  const texto = leerVariableCss("--texto");
+
   return {
     responsive: true,
     maintainAspectRatio: false,
     plugins: {
       legend: { display: false },
+      tooltip: {
+        backgroundColor: panel,
+        borderColor: borde,
+        borderWidth: 1,
+        titleColor: texto,
+        bodyColor: textoSuave,
+        padding: 10,
+        cornerRadius: 8,
+        titleFont: { family: "'Plus Jakarta Sans', sans-serif", weight: "700" },
+        bodyFont: { family: "'Fira Code', monospace" },
+      },
     },
     scales: {
       x: {
-        ticks: { color: "#8fa0bd" },
-        grid: { color: "rgba(35, 48, 74, 0.4)" },
+        ticks: { color: textoSuave },
+        grid: { color: rejilla },
       },
       y: {
         beginAtZero: true,
-        ticks: { color: "#8fa0bd", precision: 0 },
-        grid: { color: "rgba(35, 48, 74, 0.4)" },
+        ticks: { color: textoSuave, precision: 0 },
+        grid: { color: rejilla },
       },
     },
   };
@@ -192,7 +263,17 @@ function renderizarGraficos(sismos) {
   if (graficoLinea) graficoLinea.destroy();
   if (graficoBarras) graficoBarras.destroy();
 
+  Chart.defaults.font.family = "'Plus Jakarta Sans', sans-serif";
+  Chart.defaults.color = leerVariableCss("--texto-suave");
+
+  const acento = leerVariableCss("--acento") || "#ef4444";
   const porDia = contarSismosPorDia(sismos);
+  const gradiente = ctxLinea
+    .getContext("2d")
+    .createLinearGradient(0, 0, 0, 260);
+  gradiente.addColorStop(0, hexARgba(acento, 0.28));
+  gradiente.addColorStop(1, hexARgba(acento, 0));
+
   graficoLinea = new Chart(ctxLinea, {
     type: "line",
     data: {
@@ -201,11 +282,12 @@ function renderizarGraficos(sismos) {
         {
           label: "Sismos",
           data: porDia.map((d) => d.valor),
-          borderColor: "#ef4444",
-          backgroundColor: "rgba(239, 68, 68, 0.15)",
+          borderColor: acento,
+          backgroundColor: gradiente,
           fill: true,
           tension: 0.35,
-          pointBackgroundColor: "#ef4444",
+          pointRadius: 2.5,
+          pointBackgroundColor: acento,
         },
       ],
     },
@@ -213,7 +295,7 @@ function renderizarGraficos(sismos) {
   });
 
   const porMagnitud = contarSismosPorMagnitud(sismos);
-  const coloresRangos = ["#22c55e", "#eab308", "#f97316", "#ef4444", "#b91c1c"];
+  const coloresRangos = ["#22c55e", "#f59e0b", "#f97316", "#ef4444", "#b91c1c"];
   graficoBarras = new Chart(ctxBarras, {
     type: "bar",
     data: {
@@ -223,7 +305,7 @@ function renderizarGraficos(sismos) {
           label: "Sismos",
           data: porMagnitud.map((d) => d.valor),
           backgroundColor: coloresRangos,
-          borderRadius: 8,
+          borderRadius: 6,
         },
       ],
     },
@@ -300,13 +382,14 @@ async function cargarDatos(dias) {
       throw new Error("No se registraron sismos en el periodo seleccionado.");
     }
     const stats = calcularEstadisticas(sismos);
+    sismosActuales = sismos;
     renderizarKpis(stats);
     renderizarGraficos(sismos);
     renderizarMapa(sismos);
     renderizarTabla(sismos);
   } catch (error) {
     mostrarError(
-      `⚠️ No se pudieron cargar los datos sísmicos. ${error.message}`
+      `No se pudieron cargar los datos sísmicos. ${error.message}`
     );
   } finally {
     mostrarCargando(false);
