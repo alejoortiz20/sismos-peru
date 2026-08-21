@@ -123,8 +123,14 @@ body {
 
 .graficos {
   display: grid;
-  grid-template-columns: repeat(auto-fit, minmax(320px, 1fr));
+  grid-template-columns: 1fr 1fr;
   gap: 1.5rem;
+}
+
+.contenedor-grafico {
+  position: relative;
+  height: 260px;
+  width: 100%;
 }
 
 .panel {
@@ -276,6 +282,12 @@ tbody tr:hover {
 
 .pie a:hover {
   text-decoration: underline;
+}
+
+@media (max-width: 768px) {
+  .graficos {
+    grid-template-columns: 1fr;
+  }
 }
 
 @media (max-width: 640px) {
